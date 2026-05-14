@@ -1,4 +1,4 @@
-Energy-Luxury Research: Oil Shocks & European Luxury Giants (2019–2022)
+**Energy-Luxury Research: Oil Shocks & European Luxury Giants (2019–2022)**
 
 _Analyzing the impact of oil price volatility on LVMH and Kering’s financial performance._
 
