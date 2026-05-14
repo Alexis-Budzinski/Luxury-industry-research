@@ -1,0 +1,88 @@
+## Stock Data
+
+### Stock Data 2019 to 2022
+
+# Install libraries (only needed once per Colab session)
+!pip install yfinance pandas numpy tabula-py matplotlib seaborn
+
+# Import libraries
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import tabula
+from google.colab import files
+import os
+
+# Create the directory structure if it doesn't exist
+os.makedirs("PTC_Phase1/Data_Collection/stock_data", exist_ok=True)
+
+# Step 1: Download stock prices for LVMH, Kering, and CAC 40 (for Beta calculation)
+tickers = ["MC.PA", "KER.PA", "^FCHI"]
+stock_data = yf.download(tickers, start="2019-01-01", end="2022-12-31")["Close"]
+
+# Calculate daily returns and drop NA values
+returns = stock_data.pct_change().dropna()
+
+# Step 2: Calculate Beta for LVMH and Kering relative to CAC 40
+covariance_lvmh = np.cov(returns["MC.PA"], returns["^FCHI"])[0, 1]
+variance_cac40 = np.var(returns["^FCHI"])
+beta_lvmh = covariance_lvmh / variance_cac40
+
+covariance_kering = np.cov(returns["KER.PA"], returns["^FCHI"])[0, 1]
+beta_kering = covariance_kering / variance_cac40
+
+# Step 3: Fetch additional financial metrics for LVMH and Kering
+lvmh = yf.Ticker("MC.PA")
+kering = yf.Ticker("KER.PA")
+
+# Fetch P/E ratio, EV/EBITDA, and other metrics
+lvmh_pe = lvmh.info.get("trailingPE", "N/A")
+lvmh_ev_ebitda = lvmh.info.get("enterpriseToEbitda", "N/A")
+lvmh_market_cap = lvmh.info.get("marketCap", "N/A")
+
+kering_pe = kering.info.get("trailingPE", "N/A")
+kering_ev_ebitda = kering.info.get("enterpriseToEbitda", "N/A")
+kering_market_cap = kering.info.get("marketCap", "N/A")
+
+# Step 4: Create a DataFrame to store the metrics
+metrics = pd.DataFrame({
+    "Metric": ["Beta", "P/E Ratio", "EV/EBITDA", "Market Cap (EUR)"],
+    "LVMH": [beta_lvmh, lvmh_pe, lvmh_ev_ebitda, lvmh_market_cap],
+    "Kering": [beta_kering, kering_pe, kering_ev_ebitda, kering_market_cap]
+})
+
+# Step 5: Save the stock returns and metrics to CSV in the specified directory
+returns_file_path = "PTC_Phase1/Data_Collection/stock_data/stock_returns_2019_2022.csv"
+metrics_file_path = "PTC_Phase1/Data_Collection/stock_data/stock_metrics_2019_2022.csv"
+
+returns.to_csv(returns_file_path)
+metrics.to_csv(metrics_file_path)
+
+# Optional: Preview the data
+print("Stock Returns:")
+print(returns.head())
+
+print("\nStock Metrics:")
+print(metrics)
+
+
+
+### Oil & FX
+
+import os
+import yfinance as yf
+
+#  Create the folder
+os.makedirs("PTC_Phase1/Data_Collection/stock_data", exist_ok=True)
+
+#  Download the data
+oil_fx_data = yf.download(["BZ=F", "EURUSD=X"], start="2019-01-01", end="2022-12-31")["Close"]
+
+# Save the file
+oil_fx_data.to_csv("PTC_Phase1/Data_Collection/stock_data/oil_fx_2019_2022.csv")
+
+# Check if it worked
+print("File saved successfully!")
+print(os.listdir("PTC_Phase1/Data_Collection/stock_data"))  # This will show you the files in the folder
